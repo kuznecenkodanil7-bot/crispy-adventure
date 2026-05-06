@@ -1,0 +1,6 @@
+{
+  "key.moderation-helper-gui.stats": "Открыть панель Moderation Helper",
+  "key.moderation-helper-gui.stop_obs": "Остановить OBS-запись",
+  "category.moderation-helper-gui": "Moderation Helper GUI",
+  "category.moderation-helper-gui.controls": "Moderation Helper GUI"
+}

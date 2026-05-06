@@ -1,6 +1,7 @@
 package ru.wqkcpf.moderationhelper.gui;
 
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.Click;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -69,7 +70,10 @@ public class PunishmentScreen extends Screen {
     }
 
     private void sendCommand(String command) {
-        if (client == null || client.getNetworkHandler() == null || command == null || command.isBlank()) return;
+        if (client == null || client.getNetworkHandler() == null || command == null || command.isBlank()) {
+            return;
+        }
+
         String normalized = command.startsWith("/") ? command.substring(1) : command;
         client.getNetworkHandler().sendChatCommand(normalized.trim());
     }
@@ -82,58 +86,84 @@ public class PunishmentScreen extends Screen {
         int panelH = Math.min(height - 40, 430);
         int x = (width - panelW) / 2;
         int y = Math.max(20, (height - panelH) / 2);
+
         ScreenUtil.darkPanel(context, x, y, panelW, panelH);
 
         ScreenUtil.centerTitle(context, client, "Кого хочешь наказать: §f" + nick, x, y + 16, panelW);
         ScreenUtil.centerMuted(context, client, "Выберите действие", x, y + 40, panelW);
-        ScreenUtil.muted(context, client, "Скрин: " + (tempScreenshot == null ? "не создан" : "temp/" + tempScreenshot.getFileName()), x + 20, y + 302);
 
-        int statsX = x + 20;
-        int statsY = y + 322;
-        ScreenUtil.muted(context, client,
+        ScreenUtil.muted(
+                context,
+                client,
+                "Скрин: " + (tempScreenshot == null ? "не создан" : "temp/" + tempScreenshot.getFileName()),
+                x + 20,
+                y + 302
+        );
+
+        ScreenUtil.muted(
+                context,
+                client,
                 "Сессия: warn " + ModerationHelperClient.STATS.get("warn")
                         + " | mute " + ModerationHelperClient.STATS.get("mute")
                         + " | ban " + ModerationHelperClient.STATS.get("ban")
                         + " | ipban " + ModerationHelperClient.STATS.get("ipban"),
-                statsX, statsY);
+                x + 20,
+                y + 322
+        );
 
-        renderRecentPlayers(context, x + 20, y + 348, panelW - 40);
+        renderRecentPlayers(context, x + 20, y + 348);
+
         super.render(context, mouseX, mouseY, deltaTicks);
     }
 
-    private void renderRecentPlayers(DrawContext context, int x, int y, int w) {
+    private void renderRecentPlayers(DrawContext context, int x, int y) {
         ScreenUtil.muted(context, client, "Недавние игроки: клик по нику копирует его", x, y);
+
         int row = 0;
         for (String recent : ModerationHelperClient.RECENT_PLAYERS.getPlayers()) {
-            if (row >= 6) break;
+            if (row >= 6) {
+                break;
+            }
+
             int bx = x + (row % 3) * 138;
             int by = y + 14 + (row / 3) * 22;
+
             context.drawTextWithShadow(client.textRenderer, Text.literal("§f" + recent), bx, by, 0xFFFFFFFF);
             row++;
         }
     }
 
     @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
+    public boolean mouseClicked(Click click, boolean doubled) {
+        double mouseX = click.x();
+        double mouseY = click.y();
+
         int panelW = 460;
         int panelH = Math.min(height - 40, 430);
         int x = (width - panelW) / 2 + 20;
         int y = Math.max(20, (height - panelH) / 2) + 348;
+
         int row = 0;
         for (String recent : ModerationHelperClient.RECENT_PLAYERS.getPlayers()) {
-            if (row >= 6) break;
+            if (row >= 6) {
+                break;
+            }
+
             int bx = x + (row % 3) * 138;
             int by = y + 14 + (row / 3) * 22;
             int bw = 128;
             int bh = 14;
+
             if (mouseX >= bx && mouseX <= bx + bw && mouseY >= by && mouseY <= by + bh) {
                 MinecraftClient.getInstance().keyboard.setClipboard(recent);
                 client.setScreen(new PunishmentScreen(recent, null));
                 return true;
             }
+
             row++;
         }
-        return super.mouseClicked(mouseX, mouseY, button);
+
+        return super.mouseClicked(click, doubled);
     }
 
     @Override
